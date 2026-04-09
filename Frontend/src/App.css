@@ -1,0 +1,97 @@
+/* Background full screen image */
+.bg-image {
+  height: 100vh;
+  width: 100%;
+  background-image: url("https://images.unsplash.com/photo-1472437774355-71ab6752b434?auto=format&fit=crop&w=1400&q=60");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Glass Card */
+.login-card {
+  width: 420px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 45px 40px;
+  border-radius: 22px;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.25);
+}
+
+.login-card h2 {
+  font-size: 34px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  color: #0c1a33;
+}
+
+/* Input field box */
+.input-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #cfcfcf;
+  margin: 14px 0;
+}
+.input-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+}
+.icon {
+  margin-right: 12px;
+  color: #4a4a4a;
+  font-size: 18px;
+}
+
+/* Forgot password */
+.forgot {
+  text-align: right;
+  font-size: 14px;
+  color: #333;
+  margin-top: 6px;
+  cursor: pointer;
+}
+
+/* Button */
+.login-btn {
+  width: 100%;
+  padding: 16px;
+  background: #1e7bf6;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 22px;
+  cursor: pointer;
+}
+.login-btn:hover {
+  background: #0b5cca;
+}
+
+/* Divider */
+.separator {
+  width: 100%;
+  height: 1px;
+  background: #d7d7d7;
+  margin: 22px 0;
+}
+
+/* Bottom text */
+.switch-text {
+  font-size: 15px;
+}
+.switch-text span {
+  color: #1e7bf6;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+

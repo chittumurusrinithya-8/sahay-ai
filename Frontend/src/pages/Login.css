@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-color: #f8fafc;
+  --card-white: #ffffff;
+  --accent-blue: #2563eb;
+  --text-dark: #1e293b;
+  --text-light: #64748b;
+  --border-color: #e2e8f0;
+  --input-inner-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+  background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+  background-size: 24px 24px; /* Subtle grid background */
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.login-card {
+  background: var(--card-white);
+  padding: 48px;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border-color);
+}
+
+.logo-container {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  background: #fff;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Realistic floating logo */
+}
+
+.logo-container img { width: 40px; }
+
+.brand-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.brand-tagline {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+}
+
+/* REALISTIC TABS */
+.role-tab-container {
+  display: flex;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 14px;
+  margin-bottom: 28px;
+  box-shadow: var(--input-inner-shadow);
+}
+
+.role-tab-container button {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.role-tab-container button.active {
+  background: white;
+  color: var(--accent-blue);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* REALISTIC INPUTS */
+.input-field-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  transition: color 0.3s;
+}
+
+.input-field-wrapper input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: #ffffff;
+  font-size: 1rem;
+  color: var(--text-dark);
+  box-shadow: var(--input-inner-shadow);
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.input-field-wrapper input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.input-field-wrapper input:focus + .input-icon {
+  color: var(--accent-blue);
+}
+
+/* SUBMIT BUTTON */
+.login-submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s;
+}
+
+.login-submit-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.login-footer {
+  margin-top: 32px;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.login-footer button {
+  background: none;
+  border: none;
+  color: var(--accent-blue);
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 8px;
+}

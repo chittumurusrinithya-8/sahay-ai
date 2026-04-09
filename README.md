@@ -1,4 +1,4 @@
-# 🚀 Sahaay AI – Smart Grievance Redressal System
+#  Sahaay AI – Smart Grievance Redressal System
 
 ##Overview
 
@@ -28,7 +28,7 @@ Sahaay AI solves these issues by:
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 ###  AI-Based Complaint Classification
 
@@ -114,7 +114,7 @@ cd sahay-ai
 
 ---
 
-### 2️⃣ Backend Setup
+### 2️. Backend Setup
 
 ```bash
 cd Backend
@@ -138,7 +138,7 @@ python app.py
 
 ---
 
-### 3️⃣ Frontend Setup
+### 3️. Frontend Setup
 
 ```bash
 cd Frontend
@@ -220,4 +220,4 @@ Sahaay AI improves public service systems by making complaint handling faster, s
 
 ---
 
-⭐ *If you like this project, give it a star on GitHub!*
+ 

@@ -1,6 +1,5 @@
 #  Sahaay AI – Smart Grievance Redressal System
 
-##Overview
 
 **Sahaay AI** is an intelligent, AI-powered grievance redressal system designed to simplify the process of reporting, categorizing, and tracking public complaints. The system leverages Natural Language Processing (NLP), geolocation, and automation to route complaints to the appropriate departments efficiently.
 

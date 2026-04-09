@@ -1,23 +1,5 @@
-from dotenv import load_dotenv
-import os
-
-# =========================================================
-# LOAD ENV VARIABLES
-# =========================================================
-load_dotenv()
-
-MONGO_URI = os.getenv("MONGO_URI")
-EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-SPEECH_API_KEY = os.getenv("SPEECH_API_KEY")
-
-# =========================================================
-# IMPORTS
-# =========================================================
 from openai import OpenAI
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
@@ -25,7 +7,12 @@ import bcrypt
 from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
+import torch
+from transformers import BertTokenizer, BertForSequenceClassification
+import pickle
 from deep_translator import GoogleTranslator
+
+from config import MONGO_URI, EMAIL_ADDRESS, EMAIL_PASSWORD
 
 # =========================================================
 # APP SETUP
@@ -33,7 +20,7 @@ from deep_translator import GoogleTranslator
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-client_ai = OpenAI(api_key=OPENAI_API_KEY)
+client_ai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # =========================================================
 # DATABASE
@@ -45,6 +32,22 @@ users_col = db["users"]
 complaints_col = db["complaints"]
 
 print("✅ MongoDB connected successfully")
+
+# =========================================================
+# MODEL
+# =========================================================
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+tokenizer = BertTokenizer.from_pretrained("./bert_department_model")
+model = BertForSequenceClassification.from_pretrained("./bert_department_model")
+
+model.to(device)
+model.eval()
+
+with open("label_encoder.pkl", "rb") as f:
+    label_encoder = pickle.load(f)
+
+print("✅ BERT model loaded successfully")
 
 # =========================================================
 # TRANSLATION
@@ -61,17 +64,17 @@ def translate_to_english(text):
 def normalize_department(name):
     return name.strip().lower().replace("department", "").strip()
 
-# 🔥 SIMPLE FALLBACK MODEL (NO BERT)
 def predict_department(text):
-    text = text.lower()
+    try:
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=128)
+        inputs = {k: v.to(device) for k, v in inputs.items()}
 
-    if "water" in text:
-        return "Water Department"
-    elif "road" in text or "pothole" in text:
-        return "Road Department"
-    elif "electric" in text or "power" in text:
-        return "Electricity Department"
-    else:
+        with torch.no_grad():
+            outputs = model(**inputs)
+
+        predicted_class_id = torch.argmax(outputs.logits, dim=1).item()
+        return label_encoder.inverse_transform([predicted_class_id])[0]
+    except:
         return "General"
 
 # =========================================================
@@ -183,19 +186,23 @@ def submit_complaint():
         lng = data.get("lng")
         location = data.get("location")
 
+        # ✅ Convert lat/lng safely
         lat = float(lat) if lat not in [None, "", "null"] else None
         lng = float(lng) if lng not in [None, "", "null"] else None
 
         if not username or not input_text:
             return jsonify({"error": "Missing complaint fields"}), 400
 
+        # ✅ Translation
         processed_text = translate_to_english(input_text) if language == "te-IN" else input_text
 
+        # ✅ Department prediction
         department = predict_department(processed_text)
         normalized_dept = normalize_department(department)
 
         complaint_id = f"CMP-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
+        # ✅ Store complaint
         complaints_col.insert_one({
             "complaintId": complaint_id,
             "username": username,
@@ -211,6 +218,9 @@ def submit_complaint():
             "time": datetime.utcnow()
         })
 
+        # =====================================================
+        # ✅ SEND EMAIL ON REGISTRATION (FIX ADDED)
+        # =====================================================
         user = users_col.find_one({"username": username})
 
         if user and user.get("email"):
@@ -220,9 +230,13 @@ def submit_complaint():
                 f"""
 Hello {username},
 
+Your complaint has been successfully registered.
+
 Complaint ID: {complaint_id}
 Department: {department}
 Status: Pending
+
+We will update you once the issue is resolved.
 
 Thank you,
 Sahay Team
@@ -238,6 +252,101 @@ Sahay Team
         print("❌ Complaint error:", e)
         return jsonify({"error": str(e)}), 500
 
+# =========================================================
+# UPDATE STATUS + EMAIL 🔥
+# =========================================================
+@app.route("/complaint/update", methods=["PUT"])
+def update_complaint_status():
+    try:
+        data = request.get_json()
+
+        complaint_id = data.get("complaintId")
+        new_status = data.get("status")
+
+        complaint = complaints_col.find_one({"complaintId": complaint_id})
+
+        if not complaint:
+            return jsonify({"error": "Complaint not found"}), 404
+
+        complaints_col.update_one(
+            {"complaintId": complaint_id},
+            {"$set": {"status": new_status}}
+        )
+
+        username = complaint.get("username")
+        user = users_col.find_one({"username": username})
+
+        if user and user.get("email"):
+            send_email(
+                user["email"],
+                "Complaint Status Updated",
+                f"""
+Hello {username},
+
+Your complaint status has been updated.
+
+Complaint ID: {complaint_id}
+
+Issue:
+{complaint.get("original_text")}
+
+New Status: {new_status}
+
+Thank you,
+SahayAI
+"""
+            )
+
+        return jsonify({"message": "Status updated"}), 200
+
+    except Exception as e:
+        print("❌ Update error:", e)
+        return jsonify({"error": str(e)}), 500
+
+# =========================================================
+# USER COMPLAINTS
+# =========================================================
+@app.route("/complaints/user/<username>", methods=["GET"])
+def get_user_complaints(username):
+    complaints = list(
+        complaints_col.find({"username": username}, {"_id": 0})
+    )
+    return jsonify(complaints)
+
+# =========================================================
+# DEPARTMENT COMPLAINTS
+# =========================================================
+@app.route("/complaints/department/<dept>", methods=["GET"])
+def get_department_complaints(dept):
+    dept = dept.strip().lower()
+
+    complaints = list(
+        complaints_col.find(
+            {"department_normalized": dept},
+            {"_id": 0}
+        ).sort("time", -1)
+    )
+
+    return jsonify(complaints)
+@app.route("/admin/stats", methods=["GET"])
+def get_admin_stats():
+    try:
+        total_filing = complaints_col.count_documents({})
+        pending_review = complaints_col.count_documents({"status": "Pending"})
+        resolved_cases = complaints_col.count_documents({"status": "Resolved"})
+        
+        # Calculate cases submitted today
+        today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        live_today = complaints_col.count_documents({"time": {"$gte": today_start}})
+
+        return jsonify({
+            "total": total_filing,
+            "pending": pending_review,
+            "resolved": resolved_cases,
+            "today": live_today
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 # =========================================================
 # RUN
 # =========================================================

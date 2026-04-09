@@ -1,0 +1,11 @@
+venv/
+.venv/
+.env
+__pycache__/
+*.pyc
+bert_department_model/
+*.bin
+*.pt
+*.pkl
+uploads/
+node_modules/
